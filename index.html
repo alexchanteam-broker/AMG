@@ -2,408 +2,606 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專業基金經理組合提案 | PortfolioPro</title>
-    <!-- 引入 Tailwind CSS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>資產優化與稅務槓桿系統 | Alex Chan</title>
+    
+    <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Lucide 圖標 -->
+    
+    <!-- Chart.js for Data Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
-        html { scroll-behavior: smooth; }
-        /* 載入動畫設定 */
-        .fade-in-up {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: all 1s ease-out;
+        /* 隱藏原生數字輸入框的上下箭頭 */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
         }
-        .fade-in-right {
-            opacity: 0;
-            transform: translateX(40px);
-            transition: all 1s ease-out;
-            transition-delay: 0.3s;
+        input[type=number] {
+            -moz-appearance: textfield;
         }
-        .is-visible {
-            opacity: 1;
-            transform: translate(0);
+        
+        /* 隱藏原生滾動條 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+        
+        /* 深色輸入框自動填充修復 */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active{
+            -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
+            -webkit-text-fill-color: white !important;
+        }
+        
+        /* 列印模式優化 */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+            body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background-color: #020617 !important;
+            }
+            .print\:hidden {
+                display: none !important;
+            }
+            section, .bg-slate-900, .bg-slate-800, footer {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            ::-webkit-scrollbar {
+                display: none;
+            }
         }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 font-sans text-slate-800">
+<body class="min-h-screen bg-slate-950 text-slate-200 font-sans relative overflow-x-hidden flex flex-col">
 
-    <!-- Navigation -->
-    <nav class="fixed w-full bg-white/90 backdrop-blur-md z-50 border-b border-slate-200">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center space-x-2">
-                    <i data-lucide="briefcase" class="h-6 w-6 text-blue-700"></i>
-                    <span class="font-bold text-xl tracking-tight text-slate-900">PortfolioPro<span class="text-blue-700">.</span></span>
-                </div>
-                <div class="hidden md:flex space-x-8">
-                    <a href="#philosophy" class="text-slate-600 hover:text-blue-700 transition">投資理念</a>
-                    <a href="#performance" class="text-slate-600 hover:text-blue-700 transition">過往業績</a>
-                    <a href="#partnership" class="text-slate-600 hover:text-blue-700 transition">內部合作方案</a>
-                </div>
-                <a href="#contact" class="hidden md:inline-flex items-center justify-center px-5 py-2 border border-transparent text-sm font-medium rounded-full text-white bg-blue-700 hover:bg-blue-800 transition shadow-sm">
-                    預約咖啡交流
-                </a>
+    <!-- 防盜浮水印 -->
+    <div class="fixed inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center overflow-hidden z-0">
+        <div class="transform -rotate-45 text-[12rem] font-black whitespace-nowrap text-slate-100">
+            hkca_man • hkca_man
+        </div>
+    </div>
+
+    <!-- 頂部導航欄 -->
+    <header class="relative z-10 bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                <i data-lucide="bar-chart-2" class="w-6 h-6 text-emerald-400"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-wide text-white" data-i18n="app_title">資產優化與稅務槓桿系統</h1>
+                <p class="text-xs text-slate-400 uppercase tracking-wider" data-i18n="app_subtitle">Institutional Wealth Analytics</p>
             </div>
         </div>
-    </nav>
+        <div class="flex items-center gap-3">
+            <!-- 語言切換按鈕 -->
+            <button onclick="toggleLanguage()" class="print:hidden flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-3 py-2 rounded-lg text-sm font-bold transition-all shadow-sm">
+                <i data-lucide="languages" class="w-4 h-4 text-emerald-400"></i>
+                <span id="lang-btn-text">English</span>
+            </button>
 
-    <!-- Hero Section -->
-    <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto flex flex-col md:flex-row items-center overflow-hidden">
-        <div class="md:w-1/2 pr-0 md:pr-12 fade-in-up">
-            <div class="inline-flex items-center space-x-2 bg-blue-100 px-3 py-1 rounded-full text-blue-800 text-sm font-semibold mb-6">
-                <span class="flex h-2 w-2 relative">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-                </span>
-                <span>專為內部同事打造的投管支援</span>
+            <!-- 匯出 PDF 按鈕 -->
+            <button onclick="window.print()" class="print:hidden flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-3 py-2 rounded-lg text-sm font-bold transition-all shadow-sm">
+                <i data-lucide="printer" class="w-4 h-4 text-emerald-400"></i>
+                <span class="hidden sm:inline" data-i18n="pdf_btn">生成 PDF</span>
+            </button>
+
+            <div class="text-right hidden sm:block ml-2 border-l border-slate-700 pl-4">
+                <div class="font-bold text-white text-lg">Alex Chan</div>
+                <div class="text-sm text-emerald-400 font-medium" data-i18n="broker_title">Individual Insurance Broker</div>
             </div>
-            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight mb-6">
-                您專注拓展客戶關係，<br/>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-cyan-600">我專注守護與增值資產。</span>
-            </h1>
-            <p class="text-lg text-slate-600 mb-8 leading-relaxed">
-                作為您的內部投資組合經理，我為您的尊貴客戶提供量身定制的基金管理方案。讓我們攜手合作，提升客戶留存率，共同做大資產管理規模 (AUM)。
-            </p>
-            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                <a href="#partnership" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-700 hover:bg-blue-800 shadow-md transition">
-                    查看合作模式
-                    <i data-lucide="arrow-right" class="ml-2 h-5 w-5"></i>
-                </a>
-                <a href="#performance" class="inline-flex items-center justify-center px-6 py-3 border border-slate-300 text-base font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 transition">
-                    檢視實績數據
-                </a>
-            </div>
+            <!-- 頭像 -->
+            <img 
+                src="profile.jpg" 
+                alt="Alex Chan" 
+                class="w-12 h-12 rounded-full border-2 border-slate-700 object-cover shadow-lg bg-slate-800"
+            />
         </div>
-        <div class="md:w-1/2 mt-12 md:mt-0 fade-in-right">
-            <div class="relative rounded-2xl overflow-hidden shadow-2xl">
-                <div class="absolute inset-0 bg-gradient-to-tr from-blue-900/80 to-transparent z-10"></div>
-                <img 
-                    src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
-                    alt="Professional Business Meeting" 
-                    class="w-full h-[400px] object-cover"
-                />
-                <div class="absolute bottom-0 left-0 p-8 z-20">
-                    <div class="flex items-center space-x-4 mb-3">
-                        <i data-lucide="award" class="h-8 w-8 text-yellow-400"></i>
-                        <h3 class="text-white text-xl font-bold">特許金融分析師 (CFA)</h3>
-                    </div>
-                    <p class="text-blue-100">超過 10 年機構與高淨值客戶資產管理經驗</p>
+    </header>
+
+    <!-- 警告提示 -->
+    <div id="warning-banner" class="hidden relative z-20 bg-rose-500/10 border-b border-rose-500/50 text-rose-200 px-6 py-3 flex items-center justify-center gap-3 text-sm backdrop-blur-sm">
+        <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0 text-rose-500"></i>
+        <p><strong data-i18n="warning_prefix">系統風險提示：</strong> <span data-i18n="warning_desc">當前稅後有效融資成本已高於假設年化回報率，槓桿操作將導致淨資產受損。</span></p>
+    </div>
+
+    <!-- 主要內容區 -->
+    <main class="relative z-10 flex-1 p-6 flex flex-col gap-6 w-full max-w-[1800px] mx-auto">
+        
+        <!-- 頂部控制帶 (Control Ribbon) -->
+        <section class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-600 transition-colors">
+                <label class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-2 block" data-i18n="lbl_principal">融資本金 (Principal)</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
+                    <input type="number" id="input-principal" value="100000" step="10000" min="0" oninput="updateDashboard()" 
+                           class="w-full pl-7 pr-3 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-lg font-bold text-white transition-all text-right">
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Key Metrics / Highlights -->
-    <section class="bg-white py-16 border-y border-slate-200">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                <div class="text-center">
-                    <div class="text-4xl font-extrabold text-blue-700 mb-2">+12.4%</div>
-                    <div class="text-sm text-slate-500 font-medium">近五年年化回報</div>
-                </div>
-                <div class="text-center">
-                    <div class="text-4xl font-extrabold text-blue-700 mb-2">&lt; 8%</div>
-                    <div class="text-sm text-slate-500 font-medium">嚴控最大回撤</div>
-                </div>
-                <div class="text-center">
-                    <div class="text-4xl font-extrabold text-blue-700 mb-2">1.8</div>
-                    <div class="text-sm text-slate-500 font-medium">夏普比率 (Sharpe Ratio)</div>
-                </div>
-                <div class="text-center">
-                    <div class="text-4xl font-extrabold text-blue-700 mb-2">98%</div>
-                    <div class="text-sm text-slate-500 font-medium">合作客戶續約率</div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-600 transition-colors">
+                <label class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-2 block" data-i18n="lbl_rate">名義借貸利率 (Rate)</label>
+                <div class="relative">
+                    <input type="number" id="input-rate" value="5.45" step="0.01" min="0" oninput="updateDashboard()" 
+                           class="w-full pl-3 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-lg font-bold text-white transition-all text-right">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold">%</span>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Philosophy Section -->
-    <section id="philosophy" class="py-20 bg-slate-50">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold text-slate-900 mb-4">穩健與增長並重的投資哲學</h2>
-                <p class="text-lg text-slate-600 max-w-2xl mx-auto">
-                    我不盲目追求短期高回報，而是專注於風險調整後的長期穩定增長，讓您的客戶安心入睡。
-                </p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                    <div class="bg-blue-100 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
-                        <i data-lucide="pie-chart" class="h-7 w-7 text-blue-700"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">核心-探索策略 (Core-Satellite)</h3>
-                    <p class="text-slate-600">
-                        以低成本的指數基金及優質債券作為核心底倉提供穩定性，配合精選的主動型基金捕捉超額收益 (Alpha)。
-                    </p>
-                </div>
-                
-                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                    <div class="bg-emerald-100 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
-                        <i data-lucide="shield" class="h-7 w-7 text-emerald-700"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">嚴格的下行風險管理</h3>
-                    <p class="text-slate-600">
-                        將「不虧損」放在首位。透過多元資產配置及動態對沖策略，在市場劇烈波動時有效保護客戶本金。
-                    </p>
-                </div>
-
-                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
-                    <div class="bg-purple-100 w-14 h-14 rounded-xl flex items-center justify-center mb-6">
-                        <i data-lucide="bar-chart-3" class="h-7 w-7 text-purple-700"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-3">宏觀與量化結合</h3>
-                    <p class="text-slate-600">
-                        不僅依賴基本面分析，更引入量化模型監測市場情緒與資金流向，精準把握資產輪動的節奏。
-                    </p>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-600 transition-colors">
+                <label class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-2 block" data-i18n="lbl_tax">邊際稅率 (Tax Rate)</label>
+                <div class="relative">
+                    <input type="number" id="input-mtr" value="40" step="1" min="0" oninput="updateDashboard()" 
+                           class="w-full pl-3 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-lg font-bold text-white transition-all text-right">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold">%</span>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Performance Section (Mock Chart) -->
-    <section id="performance" class="py-20 bg-slate-900 text-white">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-12">
-                <div class="max-w-2xl">
-                    <h2 class="text-3xl font-bold mb-4">業績實證：穿越牛熊的穩健回報</h2>
-                    <p class="text-slate-400">
-                        以下為模擬進取型組合（70% 股 / 30% 債）相較於基準指數的歷史表現。數據顯示，在下跌市況中我們的組合展現了極強的抗跌能力。
-                    </p>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-600 transition-colors">
+                <label class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-2 block" data-i18n="lbl_return">假設回報 (Assumed Return)</label>
+                <div class="relative">
+                    <input type="number" id="input-return" value="9" step="0.1" min="0" oninput="updateDashboard()" 
+                           class="w-full pl-3 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-lg font-bold text-blue-400 transition-all text-right">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold">%</span>
                 </div>
             </div>
-
-            <div class="bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-700 overflow-x-auto">
-                <div class="space-y-6 min-w-[500px]">
-                    <!-- 2019 -->
-                    <div class="flex items-center text-sm sm:text-base">
-                        <div class="w-16 font-semibold text-slate-300">2019</div>
-                        <div class="flex-1 space-y-2">
-                            <div class="flex items-center">
-                                <div class="w-24 text-right pr-4 text-blue-400 font-medium text-xs sm:text-sm">組合 +18.5%</div>
-                                <div class="h-4 rounded-r-md bg-blue-500" style="width: 37%;"></div>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-24 text-right pr-4 text-slate-500 text-xs sm:text-sm">基準 +15.2%</div>
-                                <div class="h-2 rounded-r-md bg-slate-600" style="width: 30.4%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- 2020 -->
-                    <div class="flex items-center text-sm sm:text-base">
-                        <div class="w-16 font-semibold text-slate-300">2020</div>
-                        <div class="flex-1 space-y-2">
-                            <div class="flex items-center">
-                                <div class="w-24 text-right pr-4 text-blue-400 font-medium text-xs sm:text-sm">組合 +22.1%</div>
-                                <div class="h-4 rounded-r-md bg-blue-500" style="width: 44.2%;"></div>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-24 text-right pr-4 text-slate-500 text-xs sm:text-sm">基準 +18.4%</div>
-                                <div class="h-2 rounded-r-md bg-slate-600" style="width: 36.8%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- 2021 -->
-                    <div class="flex items-center text-sm sm:text-base">
-                        <div class="w-16 font-semibold text-slate-300">2021</div>
-                        <div class="flex-1 space-y-2">
-                            <div class="flex items-center">
-                                <div class="w-24 text-right pr-4 text-blue-400 font-medium text-xs sm:text-sm">組合 +15.3%</div>
-                                <div class="h-4 rounded-r-md bg-blue-500" style="width: 30.6%;"></div>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-24 text-right pr-4 text-slate-500 text-xs sm:text-sm">基準 +12.1%</div>
-                                <div class="h-2 rounded-r-md bg-slate-600" style="width: 24.2%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- 2022 -->
-                    <div class="flex items-center text-sm sm:text-base">
-                        <div class="w-16 font-semibold text-slate-300">2022</div>
-                        <div class="flex-1 space-y-2">
-                            <div class="flex items-center">
-                                <div class="w-24 text-right pr-4 text-blue-400 font-medium text-xs sm:text-sm">組合 -4.2%</div>
-                                <div class="h-4 bg-red-400 rounded-l-md -translate-x-full" style="width: 8.4%; margin-left: 100%;"></div>
-                                <span class="ml-4 text-xs text-yellow-400">(市場大跌，有效控回撤)</span>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-24 text-right pr-4 text-slate-500 text-xs sm:text-sm">基準 -11.5%</div>
-                                <div class="h-2 bg-red-900 rounded-l-md -translate-x-full" style="width: 23%; margin-left: 100%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- 2023 -->
-                    <div class="flex items-center text-sm sm:text-base">
-                        <div class="w-16 font-semibold text-slate-300">2023</div>
-                        <div class="flex-1 space-y-2">
-                            <div class="flex items-center">
-                                <div class="w-24 text-right pr-4 text-blue-400 font-medium text-xs sm:text-sm">組合 +14.8%</div>
-                                <div class="h-4 rounded-r-md bg-blue-500" style="width: 29.6%;"></div>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-24 text-right pr-4 text-slate-500 text-xs sm:text-sm">基準 +13.0%</div>
-                                <div class="h-2 rounded-r-md bg-slate-600" style="width: 26%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-8 pt-6 border-t border-slate-700 flex flex-wrap gap-4 text-sm text-slate-400">
-                    <div class="flex items-center"><div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div> 本策略組合</div>
-                    <div class="flex items-center"><div class="w-3 h-3 bg-slate-600 rounded-full mr-2"></div> 市場基準指數</div>
-                    <div class="w-full mt-2 text-xs text-slate-500">* 過往表現不代表未來回報，數據僅供內部參考。</div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-600 transition-colors lg:col-span-1 col-span-2">
+                <label class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-2 block" data-i18n="lbl_horizon">規劃年期 (Horizon)</label>
+                <div class="relative">
+                    <input type="number" id="input-years" value="10" step="1" min="1" oninput="updateDashboard()" 
+                           class="w-full pl-3 pr-10 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-lg font-bold text-indigo-300 transition-all text-right">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 font-bold" data-i18n="unit_year">年</span>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Internal Partnership Proposal -->
-    <section id="partnership" class="py-20 bg-blue-700 text-white relative overflow-hidden">
-        <div class="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-96 h-96 bg-blue-600 rounded-full blur-3xl opacity-50"></div>
-        <div class="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/4 w-80 h-80 bg-cyan-600 rounded-full blur-3xl opacity-50"></div>
-
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-bold mb-4">為什麼要將客戶的資金交由我管理？</h2>
-                <p class="text-xl text-blue-100 max-w-2xl mx-auto">
-                    我們分工合作：您做「前線大將」贏得客戶信任，我做「後方軍師」提供堅實的業績後盾。
-                </p>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-10 items-center">
-                <div class="space-y-8">
-                    <div class="flex">
-                        <div class="flex-shrink-0 mt-1">
-                            <div class="flex items-center justify-center h-10 w-10 rounded-lg bg-white/10 border border-white/20">
-                                <i data-lucide="users" class="h-5 w-5 text-cyan-300"></i>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <h3 class="text-xl font-bold mb-2">釋放您的寶貴時間</h3>
-                            <p class="text-blue-100">
-                                無需每天盯盤或研究數以千計的基金。您只需專注於尋找新客戶及維護客戶關係，繁瑣的調倉與市場分析交給我。
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex">
-                        <div class="flex-shrink-0 mt-1">
-                            <div class="flex items-center justify-center h-10 w-10 rounded-lg bg-white/10 border border-white/20">
-                                <i data-lucide="trending-up" class="h-5 w-5 text-cyan-300"></i>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <h3 class="text-xl font-bold mb-2">提升客戶滿意度與 AUM</h3>
-                            <p class="text-blue-100">
-                                專業、系統化的組合管理能帶來更平穩的回報體驗。客戶看到帳戶穩健增長，自然會追加投資，甚至轉介新客戶。
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex">
-                        <div class="flex-shrink-0 mt-1">
-                            <div class="flex items-center justify-center h-10 w-10 rounded-lg bg-white/10 border border-white/20">
-                                <i data-lucide="check-circle-2" class="h-5 w-5 text-cyan-300"></i>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <h3 class="text-xl font-bold mb-2">專屬的售後支援與報告</h3>
-                            <p class="text-blue-100">
-                                每月提供深入淺出的市場回顧及組合表現報告。當客戶有疑問時，我隨時準備好與您一起進行客戶會議 (Client Meetings)。
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white text-slate-900 rounded-2xl p-8 shadow-2xl">
-                    <h3 class="text-2xl font-bold mb-6 text-center">內部合作流程</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-start">
-                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-1">1</div>
-                            <div class="ml-4">
-                                <h4 class="font-bold text-slate-800">需求對接</h4>
-                                <p class="text-sm text-slate-600 mt-1">您了解客戶的風險胃納、投資期限及期望回報。</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-1">2</div>
-                            <div class="ml-4">
-                                <h4 class="font-bold text-slate-800">量身定做方案</h4>
-                                <p class="text-sm text-slate-600 mt-1">我為該客戶構建專屬的基金組合提案及回報預測。</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-1">3</div>
-                            <div class="ml-4">
-                                <h4 class="font-bold text-slate-800">客戶匯報 (可共同參與)</h4>
-                                <p class="text-sm text-slate-600 mt-1">由您或我們共同向客戶展示專業的投資策略。</p>
-                            </div>
-                        </li>
-                        <li class="flex items-start">
-                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm mt-1">4</div>
-                            <div class="ml-4">
-                                <h4 class="font-bold text-slate-800">持續管理與分潤</h4>
-                                <p class="text-sm text-slate-600 mt-1">我負責日常調倉監控，業績達標/管理費按公司內部機制共享。</p>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact CTA -->
-    <section id="contact" class="py-20 bg-white">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl font-bold text-slate-900 mb-6">準備好為您的客戶升級投資體驗了嗎？</h2>
-            <p class="text-lg text-slate-600 mb-10">
-                無論您手頭上有特定的客戶案例想討論，還是單純想了解更多我的投資框架，都歡迎隨時找我喝杯咖啡。
-            </p>
+        <!-- 下方主要區域 -->
+        <div class="flex flex-col lg:flex-row gap-6 flex-1">
             
-            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-                <a href="mailto:internal.manager@company.com" class="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl text-white bg-blue-700 hover:bg-blue-800 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
-                    <i data-lucide="mail" class="mr-3 h-5 w-5"></i>
-                    發送內部電郵
-                </a>
-                <a href="tel:+85212345678" class="inline-flex items-center justify-center px-8 py-4 border-2 border-slate-200 text-lg font-medium rounded-xl text-slate-700 bg-white hover:bg-slate-50 hover:border-blue-200 transition-all">
-                    <i data-lucide="phone" class="mr-3 h-5 w-5 text-blue-600"></i>
-                    撥打內線: 8123
-                </a>
+            <!-- 左側：圖表與教育模組 -->
+            <div class="flex-1 flex flex-col gap-6">
+                <!-- 大型圖表區 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex-1 flex flex-col min-h-[450px]">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="activity" class="w-5 h-5 text-emerald-500"></i> <span data-i18n="chart_title">財富增長軌跡分析 (稅後淨利潤)</span>
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-1" data-i18n="chart_subtitle">模擬期間已完全扣除資本增值稅及借貸利息成本</p>
+                        </div>
+                        <div class="flex flex-col items-end gap-2 bg-slate-950/50 p-2 rounded-lg border border-slate-800/50">
+                            <span class="text-xs font-bold text-emerald-400 flex items-center"><i class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></i><span data-i18n="stratA_legend">策略 A (槓桿投資)</span></span>
+                            <span class="text-xs font-bold text-sky-400 flex items-center"><i class="inline-block w-2 h-2 rounded-full bg-sky-500 mr-2 shadow-[0_0_8px_rgba(14,165,233,0.8)]"></i><span data-i18n="stratB_legend">策略 B (等額定投)</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="relative flex-1 w-full h-full">
+                        <canvas id="wealthChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 底部教育模組 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-sm">
+                        <h3 class="font-bold text-white mb-3 text-sm flex items-center gap-2">
+                            <i data-lucide="zap" class="w-4 h-4 text-emerald-500"></i> <span data-i18n="adv_title">槓桿策略優勢分析</span>
+                        </h3>
+                        <ul class="text-xs text-slate-400 space-y-2 list-none">
+                            <li class="flex gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500/70 shrink-0"></i> <span><strong class="text-slate-300" data-i18n="adv_1_title">時間價值:</strong> <span data-i18n="adv_1_desc">資金提早全額入市，最大化市場複利效應。</span></span></li>
+                            <li class="flex gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500/70 shrink-0"></i> <span><strong class="text-slate-300" data-i18n="adv_2_title">稅務護盾:</strong> <span data-i18n="adv_2_desc">融資利息全額抵扣個人入息稅，有效降低成本。</span></span></li>
+                            <li class="flex gap-2"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500/70 shrink-0"></i> <span><strong class="text-slate-300" data-i18n="adv_3_title">稅務套利:</strong> <span data-i18n="adv_3_desc">成本 100% 抵稅，但最終資本增值僅需繳 50% 稅率。</span></span></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-sm">
+                        <h3 class="font-bold text-white mb-3 text-sm flex items-center gap-2">
+                            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-500"></i> <span data-i18n="risk_title">風險管理與資產保護</span>
+                        </h3>
+                        <ul class="text-xs text-slate-400 space-y-2 list-none">
+                            <li class="flex gap-2"><i data-lucide="alert-circle" class="w-4 h-4 text-amber-500/70 shrink-0"></i> <span><strong class="text-slate-300" data-i18n="risk_1_title">利率風險:</strong> <span data-i18n="risk_1_desc">若名義貸款利率大幅飆升，可能侵蝕投資利潤。</span></span></li>
+                            <li class="flex gap-2"><i data-lucide="alert-circle" class="w-4 h-4 text-amber-500/70 shrink-0"></i> <span><strong class="text-slate-300" data-i18n="risk_2_title">無強平機制:</strong> <span data-i18n="risk_2_desc">專屬融資結構，避免傳統孖展 (Margin Call) 強制平倉風險。</span></span></li>
+                            <li class="flex gap-2"><i data-lucide="alert-circle" class="w-4 h-4 text-amber-500/70 shrink-0"></i> <span><strong class="text-slate-300" data-i18n="risk_3_title">本金保護:</strong> <span data-i18n="risk_3_desc">可配合保本基金 (Seg Funds)，提供到期及身故本金保證。</span></span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側：垂直數據總結柱 -->
+            <div class="w-full lg:w-[320px] flex-shrink-0 flex flex-col gap-4">
+                
+                <div class="flex flex-col gap-3 p-4 bg-slate-900 border border-slate-800 rounded-2xl relative overflow-hidden">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-rose-500 to-amber-500"></div>
+                    <div>
+                        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <i data-lucide="receipt" class="w-3 h-3 text-rose-500"></i> <span data-i18n="summary_interest_title">每年稅後利息支出</span>
+                        </div>
+                        <div id="out-annual-interest" class="text-2xl font-black text-rose-500"></div>
+                        <div class="text-[10px] text-slate-500 mt-1"><span data-i18n="summary_effective_base">基於有效成本率</span> <span id="out-effective-rate" class="font-bold text-rose-400"></span></div>
+                    </div>
+                    <div class="h-px w-full bg-slate-800 my-1"></div>
+                    <div>
+                        <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <i data-lucide="landmark" class="w-3 h-3 text-amber-500"></i> <span data-i18n="summary_shield_title">累計稅務抵扣效益</span>
+                        </div>
+                        <div id="out-tax-shield" class="text-xl font-bold text-amber-400"></div>
+                        <div class="text-[10px] text-slate-500 mt-1" data-i18n="summary_shield_desc">期內總利息獲政府資助額度</div>
+                    </div>
+                </div>
+
+                <div class="p-5 bg-emerald-950/20 border border-emerald-900/50 rounded-2xl relative overflow-hidden group hover:bg-emerald-950/40 transition-colors">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div class="text-emerald-500/80 text-xs font-bold uppercase tracking-wider mb-1" data-i18n="summary_stratA_title">策略 A 最終淨利潤</div>
+                    <div class="text-sm font-medium text-emerald-400 mb-1" data-i18n="summary_stratA_sub">槓桿單筆投資</div>
+                    <div id="out-stratA" class="text-3xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]"></div>
+                </div>
+
+                <div class="p-5 bg-sky-950/20 border border-sky-900/50 rounded-2xl relative overflow-hidden group hover:bg-sky-950/40 transition-colors">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-sky-500/10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div class="text-sky-500/80 text-xs font-bold uppercase tracking-wider mb-1" data-i18n="summary_stratB_title">策略 B 最終淨利潤</div>
+                    <div class="text-sm font-medium text-sky-400 mb-1" data-i18n="summary_stratB_sub">等額現金流定投</div>
+                    <div id="out-stratB" class="text-3xl font-black text-sky-400 drop-shadow-[0_0_10px_rgba(14,165,233,0.3)]"></div>
+                </div>
+
+                <div class="p-5 bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-2xl shadow-lg mt-auto">
+                    <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2" data-i18n="summary_gap_title">期末財富增值差距</div>
+                    <div id="out-wealth-gap" class="text-3xl font-black text-white leading-none mb-3"></div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs bg-slate-950/50 px-3 py-2 rounded-lg">
+                            <span class="text-slate-400" data-i18n="summary_multiplier">利潤放大倍數</span>
+                            <span id="out-multiplier" class="font-bold text-emerald-400"></span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs bg-slate-950/50 px-3 py-2 rounded-lg">
+                            <span class="text-slate-400" data-i18n="summary_total_interest">期內總利息開支</span>
+                            <span id="out-total-interest" class="font-bold text-rose-400"></span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="bg-slate-50 py-12 border-t border-slate-200 text-center">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center">
-            <div class="flex items-center space-x-2 mb-4">
-                <i data-lucide="briefcase" class="h-5 w-5 text-slate-400"></i>
-                <span class="font-bold text-lg text-slate-400">PortfolioPro.</span>
+        <!-- LLQP 監管合規披露 -->
+        <footer class="mt-4 pt-6 border-t border-slate-800 text-slate-400 text-[11px] sm:text-xs leading-relaxed pb-8 text-justify">
+            <div class="flex items-center gap-2 mb-3">
+                <i data-lucide="scale" class="w-4 h-4 text-slate-500"></i>
+                <h4 class="font-bold text-slate-300" data-i18n="footer_title">法定合規與風險披露聲明 (Legal & Regulatory Disclaimers)</h4>
             </div>
-            <p class="text-slate-500 text-sm">
-                本網頁僅供公司內部同事傳閱與參考。不構成對外之投資建議或邀約。投資涉及風險，過往業績並不代表未來表現。
-            </p>
-            <div class="mt-6 text-slate-400 text-sm">
-                © 2024 Senior Portfolio Manager. All rights reserved.
+            <div class="space-y-2">
+                <p data-i18n="disc_1"><strong>1. 僅供教育與概念演示 (Educational Purposes Only)：</strong>本系統生成之所有數據、圖表及分析均為基於用戶輸入參數之假設性推演（Illustration），僅供教育及概念探討用途，並不構成任何具體的保險、投資、理財、稅務或法律建議。</p>
+                <p data-i18n="disc_2"><strong>2. 無回報保證 (No Guarantees)：</strong>系統所用之「假設年化回報」不代表或保證實際投資回報。金融市場具有波動性，實際投資價值可能隨市場升跌，過往表現絕不預示未來結果。</p>
+                <p data-i18n="disc_3"><strong>3. 借貸投資風險 (Leverage Risk)：</strong>借錢進行投資涉及極高風險。無論投資價值如何變化，甚至出現重大虧損，投資者仍有法律責任全額償還貸款本金及所有應計利息。利息成本的增加或投資價值的下跌可能會大幅擴大虧損。</p>
+                <p data-i18n="disc_4"><strong>4. 稅務建議免責 (No Tax Advice)：</strong>系統內之稅務護盾及抵扣計算基於現行一般稅務原則（如加拿大 CRA 相關指引）。稅務法律及條例隨時可能發生變更，且每位納稅人的具體情況不同。本分析不構成專業稅務意見，在執行任何槓桿或稅務策略前，強烈建議尋求獨立且具專業資格之會計師或稅務顧問意見。</p>
+                <p data-i18n="disc_5"><strong>5. 產品條款與財務需求分析 (FNA)：</strong>如本策略涉及保本基金（Segregated Funds）或其他保險產品，所有保本保證均受限於所發行保險公司之保單合約條款及細則。持牌人 Alex Chan 乃獨立保險經紀，在提供任何具體產品建議前，將按監管要求進行完整的財務需求分析 (Financial Needs Analysis, FNA)，以確保建議符合客戶的風險承受能力及財務狀況。</p>
             </div>
-        </div>
-    </footer>
+        </footer>
+    </main>
 
-    <!-- 初始化腳本 -->
     <script>
-        // 渲染所有圖標
         lucide.createIcons();
+        const formatCurrency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+        const formatPercent = (val) => `${val.toFixed(2)}%`;
 
-        // 頁面載入動畫
-        document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(() => {
-                const elements = document.querySelectorAll('.fade-in-up, .fade-in-right');
-                elements.forEach(el => el.classList.add('is-visible'));
-            }, 100);
-        });
+        let chartInstance = null;
+        let currentLang = 'zh';
+
+        // --- 雙語翻譯字典 (Translation Dictionary) ---
+        const i18n = {
+            zh: {
+                app_title: "資產優化與稅務槓桿系統",
+                app_subtitle: "Institutional Wealth Analytics",
+                broker_title: "Individual Insurance Broker",
+                pdf_btn: "生成 PDF",
+                warning_prefix: "系統風險提示：",
+                warning_desc: "當前稅後有效融資成本已高於假設年化回報率，槓桿操作將導致淨資產受損。",
+                lbl_principal: "融資本金 (Principal)",
+                lbl_rate: "名義借貸利率 (Rate)",
+                lbl_tax: "邊際稅率 (Tax Rate)",
+                lbl_return: "假設回報 (Assumed Return)",
+                lbl_horizon: "規劃年期 (Horizon)",
+                unit_year: "年",
+                chart_title: "財富增長軌跡分析 (稅後淨利潤)",
+                chart_subtitle: "模擬期間已完全扣除資本增值稅及借貸利息成本",
+                stratA_legend: "策略 A (槓桿投資)",
+                stratB_legend: "策略 B (等額定投)",
+                adv_title: "槓桿策略優勢分析",
+                adv_1_title: "時間價值:", adv_1_desc: "資金提早全額入市，最大化市場複利效應。",
+                adv_2_title: "稅務護盾:", adv_2_desc: "融資利息全額抵扣個人入息稅，有效降低成本。",
+                adv_3_title: "稅務套利:", adv_3_desc: "成本 100% 抵稅，但最終資本增值僅需繳 50% 稅率。",
+                risk_title: "風險管理與資產保護",
+                risk_1_title: "利率風險:", risk_1_desc: "若名義貸款利率大幅飆升，可能侵蝕投資利潤。",
+                risk_2_title: "無強平機制:", risk_2_desc: "專屬融資結構，避免傳統孖展 (Margin Call) 強制平倉風險。",
+                risk_3_title: "本金保護:", risk_3_desc: "可配合保本基金 (Seg Funds)，提供到期及身故本金保證。",
+                summary_interest_title: "每年稅後利息支出",
+                summary_effective_base: "基於有效成本率",
+                summary_shield_title: "累計稅務抵扣效益",
+                summary_shield_desc: "期內總利息獲政府資助額度",
+                summary_stratA_title: "策略 A 最終淨利潤",
+                summary_stratA_sub: "槓桿單筆投資",
+                summary_stratB_title: "策略 B 最終淨利潤",
+                summary_stratB_sub: "等額現金流定投",
+                summary_gap_title: "期末財富增值差距",
+                summary_multiplier: "利潤放大倍數",
+                summary_total_interest: "期內總利息開支",
+                footer_title: "法定合規與風險披露聲明 (Legal & Regulatory Disclaimers)",
+                disc_1: "<strong>1. 僅供教育與概念演示 (Educational Purposes Only)：</strong>本系統生成之所有數據、圖表及分析均為基於用戶輸入參數之假設性推演（Illustration），僅供教育及概念探討用途，並不構成任何具體的保險、投資、理財、稅務或法律建議。",
+                disc_2: "<strong>2. 無回報保證 (No Guarantees)：</strong>系統所用之「假設年化回報」不代表或保證實際投資回報。金融市場具有波動性，實際投資價值可能隨市場升跌，過往表現絕不預示未來結果。",
+                disc_3: "<strong>3. 借貸投資風險 (Leverage Risk)：</strong>借錢進行投資涉及極高風險。無論投資價值如何變化，甚至出現重大虧損，投資者仍有法律責任全額償還貸款本金及所有應計利息。利息成本的增加或投資價值的下跌可能會大幅擴大虧損。",
+                disc_4: "<strong>4. 稅務建議免責 (No Tax Advice)：</strong>系統內之稅務護盾及抵扣計算基於現行一般稅務原則（如加拿大 CRA 相關指引）。稅務法律及條例隨時可能發生變更，且每位納稅人的具體情況不同。本分析不構成專業稅務意見，在執行任何槓桿或稅務策略前，強烈建議尋求獨立且具專業資格之會計師或稅務顧問意見。",
+                disc_5: "<strong>5. 產品條款與財務需求分析 (FNA)：</strong>如本策略涉及保本基金（Segregated Funds）或其他保險產品，所有保本保證均受限於所發行保險公司之保單合約條款及細則。持牌人 Alex Chan 乃獨立保險經紀，在提供任何具體產品建議前，將按監管要求進行完整的財務需求分析 (Financial Needs Analysis, FNA)，以確保建議符合客戶的風險承受能力及財務狀況。"
+            },
+            en: {
+                app_title: "Asset Optimization & Leverage System",
+                app_subtitle: "Institutional Wealth Analytics",
+                broker_title: "Individual Insurance Broker",
+                pdf_btn: "Export PDF",
+                warning_prefix: "System Risk Warning:",
+                warning_desc: "Current after-tax borrowing cost exceeds the assumed return. Leveraging will result in net asset destruction.",
+                lbl_principal: "Loan Principal",
+                lbl_rate: "Nominal Rate",
+                lbl_tax: "Marginal Tax Rate",
+                lbl_return: "Assumed Return",
+                lbl_horizon: "Investment Horizon",
+                unit_year: "yrs",
+                chart_title: "Wealth Growth Trajectory (Net Profit)",
+                chart_subtitle: "Fully net of capital gains tax and borrowing interest costs",
+                stratA_legend: "Strategy A (Leverage)",
+                stratB_legend: "Strategy B (DCA)",
+                adv_title: "Leverage Strategy Advantages",
+                adv_1_title: "Time in Market:", adv_1_desc: "Capital is fully deployed early to maximize compounding effects.",
+                adv_2_title: "Tax Shield:", adv_2_desc: "100% interest deductibility effectively lowers borrowing costs.",
+                adv_3_title: "Tax Arbitrage:", adv_3_desc: "Costs are 100% deductible while gains are taxed at 50% inclusion rate.",
+                risk_title: "Risk Management & Protection",
+                risk_1_title: "Interest Risk:", risk_1_desc: "Surging nominal rates may erode overall profit margins.",
+                risk_2_title: "No Margin Calls:", risk_2_desc: "Dedicated loan structure prevents traditional margin call liquidations.",
+                risk_3_title: "Principal Protection:", risk_3_desc: "Compatible with Segregated Funds for maturity and death guarantees.",
+                summary_interest_title: "Annual After-Tax Interest",
+                summary_effective_base: "Based on effective rate",
+                summary_shield_title: "Cumulative Tax Shield",
+                summary_shield_desc: "Total interest subsidized by tax deductions",
+                summary_stratA_title: "Strategy A Net Profit",
+                summary_stratA_sub: "Lump Sum Leverage",
+                summary_stratB_title: "Strategy B Net Profit",
+                summary_stratB_sub: "Equivalent Cashflow DCA",
+                summary_gap_title: "Terminal Wealth Gap",
+                summary_multiplier: "Profit Multiplier",
+                summary_total_interest: "Total Interest Paid",
+                footer_title: "Legal & Regulatory Disclaimers",
+                disc_1: "<strong>1. Educational Purposes Only:</strong> All data, charts, and analyses generated by this system are hypothetical illustrations based on user-input parameters. They are for educational and conceptual discussion purposes only and do not constitute specific insurance, investment, financial, tax, or legal advice.",
+                disc_2: "<strong>2. No Guarantees:</strong> The 'Assumed Return' used in this system does not represent or guarantee actual investment returns. Financial markets are volatile; actual investment values may fluctuate, and past performance is never indicative of future results.",
+                disc_3: "<strong>3. Leverage Risk:</strong> Borrowing to invest involves extremely high risk. Regardless of how the investment value changes, or even in the event of substantial losses, the investor remains legally obligated to fully repay the loan principal and all accrued interest. Increased interest costs or declined investment values can significantly magnify losses.",
+                disc_4: "<strong>4. No Tax Advice:</strong> The tax shield and deduction calculations herein are based on general prevailing tax principles (e.g., CRA guidelines). Tax laws and regulations are subject to change, and individual taxpayers' circumstances vary. This analysis does not constitute professional tax advice. It is strongly recommended to seek advice from an independent, qualified accountant or tax advisor before executing any leverage or tax strategies.",
+                disc_5: "<strong>5. Product Terms and FNA:</strong> If this strategy involves Segregated Funds or other insurance products, all principal guarantees are subject to the specific terms and conditions of the policy contract issued by the respective insurance company. Alex Chan is an independent insurance broker. Prior to providing any specific product recommendations, a comprehensive Financial Needs Analysis (FNA) will be conducted per regulatory requirements to ensure the suitability of the recommendation based on the client's risk tolerance and financial situation."
+            }
+        };
+
+        // 語言切換邏輯
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            document.getElementById('lang-btn-text').innerText = currentLang === 'zh' ? 'English' : '中文';
+            
+            // 更新所有靜態文本
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[currentLang][key]) {
+                    el.innerHTML = i18n[currentLang][key];
+                }
+            });
+            
+            // 重新渲染圖表及動態文本
+            updateDashboard();
+        }
+
+        // 核心計算與圖表更新
+        function updateDashboard() {
+            const principal = parseFloat(document.getElementById('input-principal').value) || 0;
+            const nominalRate = parseFloat(document.getElementById('input-rate').value) / 100 || 0;
+            const mtr = parseFloat(document.getElementById('input-mtr').value) / 100 || 0;
+            const expectedReturn = parseFloat(document.getElementById('input-return').value) / 100 || 0;
+            const years = parseInt(document.getElementById('input-years').value) || 0;
+
+            const inclusionRate = 0.5;
+            const annualInterest = principal * nominalRate;
+            const netAnnualInterest = annualInterest * (1 - mtr); 
+            
+            const labels = [];
+            const stratAData = [];
+            const stratBData = [];
+            let finalStratA = 0;
+            let finalStratB = 0;
+
+            for (let year = 1; year <= years; year++) {
+                const stratAFutureValue = principal * Math.pow(1 + expectedReturn, year);
+                const stratAGrossProfit = stratAFutureValue - principal;
+                const stratATaxableGain = Math.max(0, stratAGrossProfit * inclusionRate);
+                const stratACGTax = stratATaxableGain * mtr;
+                const stratANetProfit = stratAGrossProfit - stratACGTax;
+                const stratATotalInterestPaid = netAnnualInterest * year;
+                const stratATrueNetWealth = stratANetProfit - stratATotalInterestPaid;
+
+                let stratBFutureValue = 0;
+                let stratBTotalInvested = 0;
+                for (let i = 1; i <= year; i++) {
+                    stratBFutureValue += netAnnualInterest * Math.pow(1 + expectedReturn, year - i + 1);
+                    stratBTotalInvested += netAnnualInterest;
+                }
+                const stratBGrossProfit = stratBFutureValue - stratBTotalInvested;
+                const stratBTaxableGain = Math.max(0, stratBGrossProfit * inclusionRate);
+                const stratBCGTax = stratBTaxableGain * mtr;
+                const stratBNetProfit = stratBGrossProfit - stratBCGTax;
+                const stratBTrueNetWealth = stratBNetProfit;
+
+                // 根據語言動態切換 X 軸標籤
+                labels.push(currentLang === 'zh' ? `第 ${year} 年` : `Year ${year}`);
+                stratAData.push(Math.round(stratATrueNetWealth));
+                stratBData.push(Math.round(stratBTrueNetWealth));
+
+                if (year === years) {
+                    finalStratA = stratATrueNetWealth;
+                    finalStratB = stratBTrueNetWealth;
+                }
+            }
+
+            const effectiveRate = nominalRate * (1 - mtr);
+            const totalTaxShield = (annualInterest * mtr) * years;
+            const wealthGap = finalStratA - finalStratB;
+            const isNegativeSpread = effectiveRate >= expectedReturn;
+            const multiplier = finalStratB > 0 ? (finalStratA / finalStratB).toFixed(1) : 0;
+
+            document.getElementById('out-annual-interest').textContent = formatCurrency.format(netAnnualInterest);
+            document.getElementById('out-total-interest').textContent = formatCurrency.format(netAnnualInterest * years);
+
+            const elEffectiveRate = document.getElementById('out-effective-rate');
+            elEffectiveRate.textContent = formatPercent(effectiveRate * 100);
+            
+            const warningBanner = document.getElementById('warning-banner');
+            if (isNegativeSpread) {
+                warningBanner.classList.remove('hidden');
+            } else {
+                warningBanner.classList.add('hidden');
+            }
+
+            document.getElementById('out-tax-shield').textContent = formatCurrency.format(totalTaxShield);
+            document.getElementById('out-stratA').textContent = formatCurrency.format(finalStratA);
+            document.getElementById('out-stratB').textContent = formatCurrency.format(finalStratB);
+            
+            // 動態切換倍數後綴 (zh: 倍, en: x)
+            document.getElementById('out-multiplier').textContent = `${multiplier}${currentLang === 'zh' ? ' 倍' : 'x'}`;
+            
+            const elWealthGap = document.getElementById('out-wealth-gap');
+            if (wealthGap >= 0) {
+                elWealthGap.textContent = `+${formatCurrency.format(wealthGap)}`;
+                elWealthGap.classList.remove('text-rose-500');
+                elWealthGap.classList.add('text-white');
+            } else {
+                elWealthGap.textContent = formatCurrency.format(wealthGap);
+                elWealthGap.classList.remove('text-white');
+                elWealthGap.classList.add('text-rose-500');
+            }
+
+            renderChart(labels, stratAData, stratBData);
+        }
+
+        function renderChart(labels, dataA, dataB) {
+            const ctx = document.getElementById('wealthChart').getContext('2d');
+            
+            const gradientA = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientA.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); 
+            gradientA.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+            const gradientB = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientB.addColorStop(0, 'rgba(14, 165, 233, 0.4)'); 
+            gradientB.addColorStop(1, 'rgba(14, 165, 233, 0)');
+
+            // 動態切換圖表圖例
+            const labelA = currentLang === 'zh' ? '策略 A: 槓桿單筆投資' : 'Strategy A: Lump Sum Leverage';
+            const labelB = currentLang === 'zh' ? '策略 B: 等額現金流定投' : 'Strategy B: Equivalent Cashflow DCA';
+
+            if (chartInstance) {
+                chartInstance.data.labels = labels;
+                chartInstance.data.datasets[0].label = labelA;
+                chartInstance.data.datasets[0].data = dataA;
+                chartInstance.data.datasets[1].label = labelB;
+                chartInstance.data.datasets[1].data = dataB;
+                chartInstance.update();
+            } else {
+                Chart.defaults.color = '#64748b'; 
+                Chart.defaults.font.family = "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: labelA,
+                                data: dataA,
+                                borderColor: '#10b981', 
+                                backgroundColor: gradientA,
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 0,
+                                pointHoverRadius: 6,
+                                pointBackgroundColor: '#10b981',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2
+                            },
+                            {
+                                label: labelB,
+                                data: dataB,
+                                borderColor: '#0ea5e9', 
+                                backgroundColor: gradientB,
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 0,
+                                pointHoverRadius: 6,
+                                pointBackgroundColor: '#0ea5e9',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                titleColor: '#f1f5f9',
+                                bodyColor: '#cbd5e1',
+                                borderColor: '#334155',
+                                borderWidth: 1,
+                                padding: 12,
+                                titleFont: { size: 13, weight: 'bold' },
+                                bodyFont: { size: 14, weight: 'bold' },
+                                boxPadding: 6,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label.split(':')[0] || '';
+                                        if (label) label += ': ';
+                                        if (context.parsed.y !== null) label += formatCurrency.format(context.parsed.y);
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false, drawBorder: false }, ticks: { color: '#475569', font: { size: 11 } } },
+                            y: {
+                                border: { display: false },
+                                grid: { color: '#1e293b', borderDash: [5, 5] },
+                                ticks: {
+                                    color: '#475569', font: { size: 11 },
+                                    callback: function(value) { return '$' + (value / 1000) + 'k'; }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        window.onload = function() {
+            updateDashboard();
+        };
     </script>
 </body>
 </html>
