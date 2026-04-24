@@ -116,9 +116,9 @@
                         <button onclick="setLang('sc')" data-lang="sc" class="lang-btn text-zinc-500 hover:text-zinc-800 px-3 py-1 rounded-full text-xs font-medium transition-all">简</button>
                     </div>
 
-                    <a href="#contact" class="inline-flex items-center justify-center px-6 py-2.5 font-medium rounded-full text-zinc-900 metal-gold-bg shadow-lg shadow-gold-600/20 transition-all hover:scale-105">
-                        <span class="font-bold tracking-wide" data-tc="聯絡專案負責人" data-sc="联络专案负责人">聯絡專案負責人</span>
-                    </a>
+                    <button onclick="copyWechatId('nav-copy-text')" class="inline-flex items-center justify-center px-6 py-2.5 font-medium rounded-full text-zinc-900 metal-gold-bg shadow-lg shadow-gold-600/20 transition-all hover:scale-105">
+                        <span id="nav-copy-text" class="font-bold tracking-wide" data-tc="複製 WeChat ID" data-sc="复制 WeChat ID">複製 WeChat ID</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -155,9 +155,9 @@
             <div class="relative rounded-3xl overflow-hidden shadow-2xl shadow-zinc-900/10 border border-zinc-100/50">
                 <div class="absolute inset-0 bg-gradient-to-tr from-zinc-900/90 via-zinc-900/40 to-transparent z-10"></div>
                 <img 
-                    src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                    alt="專業基金經理團隊形象照" 
-                    class="w-full h-[480px] object-cover object-top"
+                    src="https://images.unsplash.com/photo-1618044733300-9472054094ee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+                    alt="專業投資管理與順勢交易概念圖" 
+                    class="w-full h-[480px] object-cover object-center"
                 />
                 <div class="absolute bottom-0 left-0 p-10 z-20 w-full">
                     <div class="flex items-center space-x-4 mb-4">
@@ -497,7 +497,7 @@
             </p>
             
             <div class="flex justify-center">
-                <button onclick="copyWechatId()" class="inline-flex items-center justify-center px-10 py-5 rounded-full text-zinc-900 metal-gold-bg shadow-[0_0_20px_rgba(191,149,63,0.3)] transition-all transform hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(191,149,63,0.5)] cursor-pointer group">
+                <button onclick="copyWechatId('wechat-copy-text')" class="inline-flex items-center justify-center px-10 py-5 rounded-full text-zinc-900 metal-gold-bg shadow-[0_0_20px_rgba(191,149,63,0.3)] transition-all transform hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(191,149,63,0.5)] cursor-pointer group">
                     <div class="bg-white/30 p-3 rounded-full mr-5 backdrop-blur-sm shadow-sm border border-white/40 group-hover:scale-110 transition-transform">
                         <i data-lucide="message-circle" class="h-8 w-8 text-zinc-900"></i>
                     </div>
@@ -585,7 +585,7 @@
         }
 
         // 複製 WeChat ID 邏輯 (隱藏式自動複製)
-        function copyWechatId() {
+        function copyWechatId(elementId) {
             const wechatId = "echo164700";
             const textArea = document.createElement("textarea");
             textArea.value = wechatId;
@@ -601,18 +601,20 @@
             try {
                 const successful = document.execCommand('copy');
                 if (successful) {
-                    const copyTextEl = document.getElementById('wechat-copy-text');
-                    const lang = localStorage.getItem('portfolio_lang') || 'tc';
-                    const successMsg = lang === 'sc' ? "✅ 已复制 ID" : "✅ 已複製 ID";
-                    const originalMsg = copyTextEl.getAttribute('data-' + lang);
-                    
-                    // 變更文字為成功提示
-                    copyTextEl.innerText = successMsg;
-                    
-                    // 3 秒後恢復原來的文字
-                    setTimeout(() => {
-                        copyTextEl.innerText = originalMsg;
-                    }, 3000);
+                    const copyTextEl = document.getElementById(elementId);
+                    if (copyTextEl) {
+                        const lang = localStorage.getItem('portfolio_lang') || 'tc';
+                        const successMsg = lang === 'sc' ? "✅ 已复制 ID" : "✅ 已複製 ID";
+                        const originalMsg = copyTextEl.getAttribute('data-' + lang);
+                        
+                        // 變更文字為成功提示
+                        copyTextEl.innerText = successMsg;
+                        
+                        // 3 秒後恢復原來的文字
+                        setTimeout(() => {
+                            copyTextEl.innerText = originalMsg;
+                        }, 3000);
+                    }
                 }
             } catch (err) {
                 console.error('複製失敗', err);
@@ -623,14 +625,3 @@
     </script>
 </body>
 </html>
-```可以的，這兩個修改都非常關鍵。
-
-1.  **更換照片**：我已經將您的個人照片換成了一張更具代表性的「專業基金經理團隊形象照」，這張照片更能展現團隊的專業氣勢。
-2.  **修改合作模式文案**：為了明確表達「不直接面對客戶」，我將合作流程中的關鍵步驟和售後支援描述進行了精確的改寫。
-
-以下是文案修改的重點摘要：
-
-* **「專屬的售後支援與報告」**：將原先的「參與會議」改為「提供專業數據與分析支援，助您從容應對」。強調你們是顧問強大的後台支持。
-* **「內部合作流程」步驟 3**：將標題由「客戶匯報」改為「提供匯報材料」，並明確說明是由顧問向客戶展示，你們負責準備材料。
-
-您可以查看右側的預覽，確認這些變動是否符合您的需求。
